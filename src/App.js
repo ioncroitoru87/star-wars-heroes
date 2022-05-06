@@ -1,23 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react";
+import HeroList from "./components/HeroesList/HeroList";
+import SearchBar from "./components/SearchBar/SearchBar";
 
 function App() {
+  const [heroes, setHeroes] = useState([]);
+  const [term, setTerm] = useState("");
+
+  useEffect(() => {
+    async function fetchHeroes() {
+      const { results } = await fetch(
+        "https://swapi.dev/api/people/?format=json"
+      ).then((res) => res.json());
+      setHeroes(results);
+    }
+    fetchHeroes();
+  }, []);
+
+  const onSearchChange = (event) => {
+    setTerm(event.target.value);
+  };
+  const filteredHeroes = heroes.filter((hero) => {
+    return hero.name.toLowerCase().includes(term.toLowerCase());
+  });
+
+  if (heroes.length === 0) {
+    return <h1>Loading...</h1>;
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+    <div>
+      <header className="header container">
+        <h1>Star war Heroes</h1>
+        <SearchBar searchChange={onSearchChange} />
       </header>
+      <HeroList heroes={filteredHeroes} />
     </div>
   );
 }
